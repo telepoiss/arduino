@@ -20,57 +20,82 @@ int sensorValue = 0;       // variable to store the value coming from the sensor
 int outputValue = 0;       // analogväärtus ümber mäpitud  0-255 vahemikku
 
 
+const int numReadings = 20;
+int readings[numReadings];      // the readings from the analog input
+int index = 0;                  // the index of the current reading
+int total = 0;                  // the running total
+int average = 0;                // the average
+
+
 
 void setup() {
   pinMode(firstPin, OUTPUT);
   pinMode(secondPin, OUTPUT);
   pinMode(switchPin, INPUT); 
+  Serial.begin(9600);
+  
+  // initialize all the readings to 0: 
+  for (int thisReading = 0; thisReading < numReadings; thisReading++)
+    readings[thisReading] = 0;
 }
 
 
 
  void loop() {
    
+   // subtract the last reading:
+  total= total - readings[index];         
+  // read from the sensor:  
+  readings[index] = analogRead(sensorPin); 
+  // add the reading to the total:
+  total= total + readings[index];       
+  // advance to the next position in the array:  
+  index = index + 1;                    
+
+  // if we're at the end of the array...
+  if (index >= numReadings)              
+    // ...wrap around to the beginning: 
+    index = 0;                           
+
+  // calculate the average:
+  average = total / numReadings;         
+  // send it to the computer as ASCII digits
+   
+  delay(1);        // delay in between reads for stability 
+   
+   //sensorValue = analogRead(sensorPin);
+   outputValue = map(average, 0, 1023, 3, 255);
+   delay(FADESPEED);
+
+    // print the results to the serial monitor:
+    Serial.print("avegage = ");
+    Serial.print(average);
+    Serial.print("\t sensor = " );                       
+    Serial.print(sensorValue);      
+    Serial.print("\t output = ");      
+    Serial.println(outputValue);
+  
+  
+   
    buttonState = digitalRead(switchPin);
    // kordamööda 6sek delayga
    if (buttonState == HIGH) { 
+     analogWrite(firstPin, outputValue);
+     analogWrite(secondPin, 0);
+     delay(DELAY);
      
-       sensorValue = analogRead(sensorPin);
-       outputValue = map(sensorValue, 0, 1023, 0, 255);
-    
-        analogWrite(firstPin, outputValue);
-        analogWrite(secondPin, 0);
-        
-        delay(DELAY); //6sekundit
-        
-        analogWrite(firstPin, 0);
-        analogWrite(secondPin, outputValue);
-        
-        delay(DELAY); //6sekundit
-      }
-      else {
-    // põlevad mõlemad konstantselt
-     analogWrite(firstPin, 255);
-     analogWrite(secondPin, 255);
-     }
-  }
- 
-  
-  /*
- //FADE KOOD KUI TAHAKS ÜHTLASEMALT FADE'ida
-   for (int brightness = 0; brightness < 255; brightness++) {
-      analogWrite(firstPin, brightness);
-      delay(FADESPEED);
+     analogWrite(firstPin, 0);
+     analogWrite(secondPin, outputValue);
+     delay(DELAY);
+
+   }
+   //mõlemad korraga
+    else if (buttonState == LOW) {
+      analogWrite(secondPin, outputValue);
+      analogWrite(firstPin, outputValue);
+      delay(200);
+      
     }
 
-    delay(2000);
-
-    for (int brightness = 255; brightness >= 0; brightness--) {
-          analogWrite(firstPin, brightness);
-          delay(FADESPEED);
-    }
-
-    delay(2000);
-  */
-
+ }
 
