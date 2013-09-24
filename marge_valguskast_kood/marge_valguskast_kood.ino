@@ -13,14 +13,14 @@ Kaks valguskasti mis kordamööda vilguvad.
 #define DELAY 6000         // piltide vahetuse intervall
 #define firstPin 3         // esimene valguskast PWM pin
 #define secondPin 5        // teine valguskast   PWM pin
-const int switchPin = 2;   // lüliti vilkumine/constant on
+#define switchPin 2        // lüliti vilkumine/constant on
 int buttonState = 0;       // muutuja lüliti seisu hoidmiseks
 int sensorPin = A0;        // select the input pin for the potentiometer
 int sensorValue = 0;       // variable to store the value coming from the sensor
 int outputValue = 0;       // analogväärtus ümber mäpitud  0-255 vahemikku
 
 
-const int numReadings = 20;
+const int numReadings = 18;
 int readings[numReadings];      // the readings from the analog input
 int index = 0;                  // the index of the current reading
 int total = 0;                  // the running total
@@ -68,10 +68,10 @@ void setup() {
    delay(FADESPEED);
 
     // print the results to the serial monitor:
-    Serial.print("avegage = ");
+    Serial.print("average = ");
     Serial.print(average);
-    Serial.print("\t sensor = " );                       
-    Serial.print(sensorValue);      
+//    Serial.print("\t sensor = " );                       
+//    Serial.print(sensorValue);      
     Serial.print("\t output = ");      
     Serial.println(outputValue);
   
@@ -80,6 +80,7 @@ void setup() {
    buttonState = digitalRead(switchPin);
    // kordamööda 6sek delayga
    if (buttonState == HIGH) { 
+     Serial.print("Vaheldumisi  "); 
      analogWrite(firstPin, outputValue);
      analogWrite(secondPin, 0);
      delay(DELAY);
@@ -91,6 +92,7 @@ void setup() {
    }
    //mõlemad korraga
     else if (buttonState == LOW) {
+      Serial.print("M6lemad koos  ");
       analogWrite(secondPin, outputValue);
       analogWrite(firstPin, outputValue);
       delay(200);
